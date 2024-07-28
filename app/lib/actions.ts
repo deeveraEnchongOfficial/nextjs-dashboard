@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 
 const InvoiceSchema = z.object({
   id: z.string(),
-  customerId: z.string({
+  customer_id: z.string({
     invalid_type_error: "Please select a customer.",
   }),
   amount: z.coerce
@@ -26,7 +26,7 @@ const CreateInvoice = InvoiceSchema.omit({ id: true, date: true });
 
 export type State = {
   errors?: {
-    customerId?: string[];
+    customer_id?: string[];
     amount?: string[];
     status?: string[];
   };
@@ -36,7 +36,7 @@ export type State = {
 // export async function createInvoice(prevState: State, formData: FormData) {
 //   // Validate form fields using Zod
 //   const validatedFields = CreateInvoice.safeParse({
-//     customerId: formData.get("customerId"),
+//     customer_id: formData.get("customer_id"),
 //     amount: formData.get("amount"),
 //     status: formData.get("status"),
 //   });
@@ -50,7 +50,7 @@ export type State = {
 //   }
 
 //   // Prepare data for insertion into the database
-//   const { customerId, amount, status } = validatedFields.data;
+//   const { customer_id, amount, status } = validatedFields.data;
 //   const amountInCents = amount * 100;
 //   const date = new Date().toISOString().split("T")[0];
 
@@ -60,7 +60,7 @@ export type State = {
 //   try {
 //     await sql`
 //         INSERT INTO invoices (customer_id, amount, status, date)
-//         VALUES (${customerId}, ${amountInCents}, ${status}, ${date})`;
+//         VALUES (${customer_id}, ${amountInCents}, ${status}, ${date})`;
 //   } catch (error) {
 //     return {
 //       message: "Database Error: Failed to Create Invoice.",
@@ -75,7 +75,7 @@ export type State = {
 export async function createInvoice(prevState: State, formData: FormData) {
   // Validate form fields using Zod
   const validatedFields = CreateInvoice.safeParse({
-    customerId: formData.get("customerId"),
+    customer_id: formData.get("customer_id"),
     amount: formData.get("amount"),
     status: formData.get("status"),
   });
@@ -89,7 +89,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
   }
 
   // Prepare data for insertion into the database
-  const { customerId, amount, status } = validatedFields.data;
+  const { customer_id, amount, status } = validatedFields.data;
   const amountInCents = amount * 100;
   const date = new Date().toISOString().split("T")[0];
 
@@ -97,7 +97,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
   try {
     await prisma.invoice.create({
       data: {
-        customerId,
+        customer_id,
         amount: amountInCents,
         status,
         date,
@@ -128,7 +128,7 @@ const UpdateInvoice = InvoiceSchema.omit({ id: true, date: true });
 
 //   // Validate form fields using Zod
 //   const validatedFields = UpdateInvoice.safeParse({
-//     customerId: formData.get('customerId'),
+//     customer_id: formData.get('customer_id'),
 //     amount: formData.get('amount'),
 //     status: formData.get('status'),
 //   });
@@ -142,13 +142,13 @@ const UpdateInvoice = InvoiceSchema.omit({ id: true, date: true });
 //   }
 
 //   // Prepare data for insertion into the database
-//   const { customerId, amount, status } = validatedFields.data;
+//   const { customer_id, amount, status } = validatedFields.data;
 //   const amountInCents = amount * 100;
 //   // Insert data into the database
 //   try {
 //     await sql`
 //       UPDATE invoices
-//       SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+//       SET customer_id = ${customer_id}, amount = ${amountInCents}, status = ${status}
 //       WHERE id = ${id}
 //     `;
 //   } catch (error) {
@@ -166,7 +166,7 @@ export async function updateInvoice(
 ) {
   // Validate form fields using Zod
   const validatedFields = UpdateInvoice.safeParse({
-    customerId: formData.get("customerId"),
+    customer_id: formData.get("customer_id"),
     amount: formData.get("amount"),
     status: formData.get("status"),
   });
@@ -180,7 +180,7 @@ export async function updateInvoice(
   }
 
   // Prepare data for insertion into the database
-  const { customerId, amount, status } = validatedFields.data;
+  const { customer_id, amount, status } = validatedFields.data;
   const amountInCents = amount * 100;
 
   // Update data in the database
@@ -188,7 +188,7 @@ export async function updateInvoice(
     await prisma.invoice.update({
       where: { id },
       data: {
-        customerId,
+        customer_id,
         amount: amountInCents,
         status,
       },

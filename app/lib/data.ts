@@ -83,7 +83,7 @@ export async function fetchLatestInvoices() {
         customer: {
           select: {
             name: true,
-            imageUrl: true,
+            image_url: true,
             email: true,
           },
         },
@@ -98,7 +98,7 @@ export async function fetchLatestInvoices() {
       ...invoice,
       amount: formatCurrency(invoice.amount),
       name: invoice.customer.name,
-      imageUrl: invoice.customer.imageUrl,
+      image_url: invoice.customer.image_url,
       email: invoice.customer.email,
     }));
 
@@ -259,7 +259,7 @@ export async function fetchFilteredInvoices(
       status: invoice.status,
       name: invoice.customer.name,
       email: invoice.customer.email,
-      image_url: invoice.customer.imageUrl,
+      image_url: invoice.customer.image_url,
     }));
   } catch (error) {
     console.error("Database Error:", error);
@@ -319,28 +319,58 @@ export async function fetchInvoicesPages(query: string) {
   }
 }
 
+// export async function fetchInvoiceById(id: string) {
+//   noStore();
+//   try {
+//     const data = await sql<InvoiceForm>`
+//       SELECT
+//         invoices.id,
+//         invoices.customer_id,
+//         invoices.amount,
+//         invoices.status
+//       FROM invoices
+//       WHERE invoices.id = ${id};
+//     `;
+
+//     const invoice = data.rows.map((invoice) => ({
+//       ...invoice,
+//       // Convert amount from cents to dollars
+//       amount: invoice.amount / 100,
+//     }));
+
+//     return invoice[0];
+//   } catch (error) {
+//     console.error("Database Error:", error);
+//   }
+// }
+
 export async function fetchInvoiceById(id: string) {
   noStore();
   try {
-    const data = await sql<InvoiceForm>`
-      SELECT
-        invoices.id,
-        invoices.customer_id,
-        invoices.amount,
-        invoices.status
-      FROM invoices
-      WHERE invoices.id = ${id};
-    `;
+    const invoice = await prisma.invoice.findUnique({
+      where: {
+        id: id,
+      },
+      select: {
+        id: true,
+        customer_id: true,
+        amount: true,
+        status: true,
+      },
+    });
 
-    const invoice = data.rows.map((invoice) => ({
-      ...invoice,
+    if (invoice) {
       // Convert amount from cents to dollars
-      amount: invoice.amount / 100,
-    }));
-
-    return invoice[0];
+      return {
+        ...invoice,
+        amount: invoice.amount / 100,
+      };
+    } else {
+      return null;
+    }
   } catch (error) {
     console.error("Database Error:", error);
+    throw new Error("Failed to fetch invoice by ID.");
   }
 }
 
@@ -372,13 +402,13 @@ export async function fetchCustomers() {
         name: true,
       },
       orderBy: {
-        name: 'asc',
+        name: "asc",
       },
     });
     return customers;
   } catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch all customers.');
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch all customers.");
   }
 }
 
@@ -424,15 +454,15 @@ export async function fetchFilteredCustomers(query: string) {
     const customers = await prisma.customer.findMany({
       where: {
         OR: [
-          { name: { contains: query, mode: 'insensitive' } },
-          { email: { contains: query, mode: 'insensitive' } },
+          { name: { contains: query, mode: "insensitive" } },
+          { email: { contains: query, mode: "insensitive" } },
         ],
       },
       select: {
         id: true,
         name: true,
         email: true,
-        imageUrl: true,
+        image_url: true,
         _count: {
           select: { invoices: true },
         },
@@ -444,23 +474,23 @@ export async function fetchFilteredCustomers(query: string) {
         },
       },
       orderBy: {
-        name: 'asc',
+        name: "asc",
       },
     });
 
-    const formattedCustomers = customers.map(customer => {
+    const formattedCustomers = customers.map((customer) => {
       const total_pending = customer.invoices
-        .filter(invoice => invoice.status === 'pending')
+        .filter((invoice) => invoice.status === "pending")
         .reduce((sum, invoice) => sum + invoice.amount, 0);
       const total_paid = customer.invoices
-        .filter(invoice => invoice.status === 'paid')
+        .filter((invoice) => invoice.status === "paid")
         .reduce((sum, invoice) => sum + invoice.amount, 0);
 
       return {
         id: customer.id,
         name: customer.name,
         email: customer.email,
-        image_url: customer.imageUrl,
+        image_url: customer.image_url,
         total_invoices: customer._count.invoices,
         total_pending: formatCurrency(total_pending),
         total_paid: formatCurrency(total_paid),
@@ -469,8 +499,8 @@ export async function fetchFilteredCustomers(query: string) {
 
     return formattedCustomers;
   } catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch customer table.');
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch customer table.");
   }
 }
 

@@ -35,7 +35,7 @@ async function seedCustomers() {
         id: customer.id,
         name: customer.name,
         email: customer.email,
-        imageUrl: customer.image_url,
+        image_url: customer.image_url,
       },
     });
   }
@@ -49,7 +49,7 @@ async function seedInvoices() {
       update: {},
       create: {
         // id: invoice.id,
-        customerId: invoice.customer_id,
+        customer_id: invoice.customer_id,
         amount: invoice.amount,
         status: invoice.status,
         date: invoice.date,

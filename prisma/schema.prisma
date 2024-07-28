@@ -24,17 +24,17 @@ model Customer {
   id        String  @id @default(uuid())
   name      String
   email     String  @unique
-  imageUrl  String  @map("image_url")
+  image_url  String  @map("image_url")
   invoices  Invoice[]
 }
 
 model Invoice {
   id         String   @id @default(uuid())
-  customerId String
+  customer_id String
   amount     Int
   status     String
   date       String
-  customer   Customer @relation(fields: [customerId], references: [id])
+  customer   Customer @relation(fields: [customer_id], references: [id])
 }
 
 model Revenue {
